@@ -18,7 +18,7 @@ const usePState = (key, initialstate) =>{
 
 const App = () => {
 
-  const stories = [
+  const initialStories = [
     {
       title: 'React',
       url: 'https://reactjs.org/',
@@ -40,45 +40,61 @@ const App = () => {
   const [searchTerm, setSearchTerm] = usePState(
    'search', 'React'
   );
+
+  const [stories, setStories] = React.useState(initialStories);
   
   const handleSearch = event => {
     setSearchTerm(event.target.value)
   }
-  const searchedStories = stories.filter((story)=>{
-      return story.title.toLowerCase().includes(searchTerm.toLowerCase());
-  })
 
+
+  const handleStories = (item) => {
+    const newStories = stories.filter(
+      story => item.objectID!==story.objectID
+    );
+
+  setStories(newStories);
+  };
 
   return (
     <div>
       <h1>My Hacker Stories </h1>
-      <Search search={searchTerm} onSearch={handleSearch} />
-      <List stories={searchedStories} />
+      <Search 
+        id = "search"
+        value={searchTerm} 
+        onSearch={handleSearch}
+        isFocused
+      >
+        <strong>Search:</strong>
+      </Search>
+      <hr/>
+      <List stories={stories} onRemoveItem={handleStories} />
 
     </div>
   );
 }
 
-const Search = ({search, onSearch}) => {
-
-  return (
-    <div>
-      <label htmlFor="search"> Search: </label>
-      <input id="search" type="text" value={search} onChange={onSearch} />
-      <hr />
-
-    </div>
+const Search = ({id, value, type="text", onSearch, children, isFocused}) => (   //children added
+    <>
+      <label htmlFor="search"> {children}: </label>
+      <input 
+       id={id}
+       type={type} 
+       value={value} 
+       autoFocus={isFocused}
+       onChange={onSearch} 
+       />
+      
+    </>
   );
 
-}
 
-const List = ({ stories }) => {
-  return stories.map(item =>  <Item key={item.objectID} item={item}/>
+const List = ({ stories, onRemoveItem }) => 
+   stories.map(item =>  <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem}/>
   );
-}
 
-const Item = ({item}) => {
-  return (
+
+const Item = ({item, onRemoveItem}) => (
     <div >
       <span>
         <a href={item.url}>{item.title}</a>
@@ -86,9 +102,11 @@ const Item = ({item}) => {
       <span>{item.author}</span>
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
-
+      <span>
+        <button type="button" onClick={()=>onRemoveItem(item)}></button>
+      </span>
     </div>
   );
-}
+
 
 export default App;
