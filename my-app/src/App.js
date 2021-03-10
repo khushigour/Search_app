@@ -61,27 +61,32 @@ const App = () => {
     {data: [], isLoading: false, isError: false}
     );
 
+    const [url, setUrl] = React.useState(
+      `${API_ENDPOINT}${searchTerm}`
+    );
+
   // const [isLoading, setIsLoading] = React.useState(false);
   // const [isError, setIsError] = React.useState(false);
 
   React.useEffect(()=>{
     
-    if(searchTerm=== '')return;
-
     setStories({type: 'STORIES_FETCH_INIT'});
     
-   fetch(`${API_ENDPOINT}${searchTerm}`).then(response => response.json()).then(result =>{
+   fetch(url).then(response => response.json()).then(result =>{
       setStories({
         type: 'STORIES_FETCH_SUCCESS',
         payload: result.hits
       })
     }).catch(()=> setStories({type: 'STORIES_FETCH_FAILURE'}));
-  }, [searchTerm]);
+  }, [url]);
   
   const handleSearch = event => {
     setSearchTerm(event.target.value)
-  }
+  };
 
+  const handleSearchSubmit = () =>{
+    setUrl(`${API_ENDPOINT}${searchTerm}`)
+  };
 
 
   const handleStories = (item) => {
@@ -106,6 +111,15 @@ const App = () => {
       >
           <strong>Search:</strong>
       </Search>
+      
+
+      <button type="button"
+      disabled={!searchTerm}
+      onClick = {handleSearchSubmit}
+      >
+        Submit
+      </button>
+
       <hr/>
       {stories.isError && <p>Something went wrong...</p>}
       {
