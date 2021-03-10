@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react'
-import axios from 'axios';
+
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
@@ -73,7 +73,7 @@ const App = () => {
     
     setStories({type: 'STORIES_FETCH_INIT'});
     
-   axios.get(url).then(result =>{
+   fetch(url).then(response =>response.json()).then(result =>{
       setStories({
         type: 'STORIES_FETCH_SUCCESS',
         payload: result.hits
@@ -85,8 +85,9 @@ const App = () => {
     setSearchTerm(event.target.value)
   };
 
-  const handleSearchSubmit = () =>{
+  const handleSearchSubmit = event =>{
     setUrl(`${API_ENDPOINT}${searchTerm}`)
+    event.preventDefault();
   };
 
 
@@ -97,29 +98,17 @@ const App = () => {
      });
   };
 
-  // const searchedStories = stories.data.filter(story =>
-  //   story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
 
   return (
-    <div>
-      <h1>My Hacker Stories </h1>
-      <Search 
-          id = "search"
-          value={searchTerm} 
-          onSearch={handleSearch}
-          isFocused
-      >
-          <strong>Search:</strong>
-      </Search>
+    <div className="container">
+      <h1 className="headline-primary">My Hacker Stories </h1>
       
+          <SearchForm 
+            searchTerm = {searchTerm}
+            onSearchInput = {handleSearch}
+            onSearchSubmit = {handleSearchSubmit}
+            />
 
-      <button type="button"
-      disabled={!searchTerm}
-      onClick = {handleSearchSubmit}
-      >
-        Submit
-      </button>
 
       <hr/>
       {stories.isError && <p>Something went wrong...</p>}
@@ -134,15 +123,39 @@ const App = () => {
   );
 }
 
+
+const SearchForm = ({
+  searchTerm,
+  onSearchInput,
+  onSearchSubmit,
+}) => (
+  <form onSubmit = {onSearchSubmit} className="search-form">
+    <Search
+      id="search"
+      value={searchTerm}
+      isFocused
+      onSearch={onSearchInput}
+    >
+      <strong>Search</strong>
+    </Search>
+
+    <button type="submit" disabled={!searchTerm} className="button button_large">
+      Submit
+    </button>
+  </form>
+ 
+);
+
 const Search = ({id, value, type="text", onSearch, children, isFocused}) => (   //children added
     <>
-      <label htmlFor="search"> {children}: </label>
+      <label htmlFor="search" className="label"> {children}: </label>
       <input 
        id={id}
        type={type} 
        value={value} 
        autoFocus={isFocused}
        onChange={onSearch} 
+       className="input"
        />
       
     </>
@@ -155,15 +168,18 @@ const List = ({ stories, onRemoveItem }) =>
 
 
 const Item = ({item, onRemoveItem}) => (
-    <div >
-      <span>
+    <div className="item" >
+      <span style={{width: '40%'}}>
         <a href={item.url}>{item.title}</a>
       </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
-        <button type="button" onClick={()=>onRemoveItem(item)}>
+      <span style={{width: '30%'}}>{item.author}</span>
+      <span style={{width: '30%'}}>{item.num_comments}</span>
+      <span style={{width: '30%'}}>{item.points}</span>
+      <span style={{width: '30%'}}>
+        <button 
+        type="button" 
+        onClick={()=>onRemoveItem(item)}
+        className="button button_small">
           Dismiss
         </button>
       </span>
